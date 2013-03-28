@@ -1718,6 +1718,18 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="tinyxml2"
+				>
+				<File
+					RelativePath="..\support\tinyxml2\tinyxml2.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\support\tinyxml2\tinyxml2.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="textures"
