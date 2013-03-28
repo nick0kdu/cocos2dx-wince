@@ -143,8 +143,14 @@ const char* CCFileUtils::fullPathFromRelativePath(const char *pszRelativePath)
             }
         }
 	}  
-
+#ifndef WINCE
 	DWORD attrib = GetFileAttributesA(hiRes.c_str());
+#else
+	WCHAR pwHiRes = new WCHAR[hiRes.size() + 1];
+	MultiByteToWideChar(CP_ACP, 0, hiRes.c_str(), hiRes.size(), pwHiRes, hiRes.size() + 1);
+	DWORD attrib = GetFileAttributesW(pwHiRes);
+	delete [] pwHiRes;
+#endif
 	if (attrib != INVALID_FILE_ATTRIBUTES && ! (FILE_ATTRIBUTE_DIRECTORY & attrib))
     {
         pRet->m_sString.swap(hiRes);
