@@ -26,6 +26,8 @@ THE SOFTWARE.
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
 
+#include <windows.h>
+
 int CC_DLL gettimeofday(struct timeval * val, struct timezone *)
 {
     if (val)

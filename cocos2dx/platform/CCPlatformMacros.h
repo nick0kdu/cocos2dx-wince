@@ -216,6 +216,7 @@ public: virtual void set##funName(varType var)   \
 
 #endif  // CC_PLATFORM_WIN32
 
+
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WOPHONE && defined(_TRANZDA_VM_))
 
     #undef CC_DLL

@@ -1583,13 +1583,9 @@ XMLError XMLDocument::LoadFile( const char* filename )
     Clear();
     FILE* fp = 0;
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1400 )
-    errno_t err = fopen_s(&fp, filename, "rb" );
-    if ( !fp || err) {
-#else
     fp = fopen( filename, "rb" );
     if ( !fp) {
-#endif
+
         SetError( XML_ERROR_FILE_NOT_FOUND, filename, 0 );
         return _errorID;
     }
@@ -1636,13 +1632,8 @@ XMLError XMLDocument::LoadFile( FILE* fp )
 XMLError XMLDocument::SaveFile( const char* filename, bool compact )
 {
     FILE* fp = 0;
-#if defined(_MSC_VER) && (_MSC_VER >= 1400 )
-    errno_t err = fopen_s(&fp, filename, "w" );
-    if ( !fp || err) {
-#else
     fp = fopen( filename, "w" );
     if ( !fp) {
-#endif
         SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, filename, 0 );
         return _errorID;
     }
@@ -1766,7 +1757,7 @@ void XMLPrinter::Print( const char* format, ... )
         int len = -1;
         int expand = 1000;
         while ( len < 0 ) {
-            len = vsnprintf_s( _accumulator.Mem(), _accumulator.Capacity(), _TRUNCATE, format, va );
+            len = vsnprintf( _accumulator.Mem(), _accumulator.Capacity(),  format, va );
             if ( len < 0 ) {
                 expand *= 3/2;
                 _accumulator.PushArr( expand );

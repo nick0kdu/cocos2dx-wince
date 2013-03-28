@@ -40,6 +40,44 @@ THE SOFTWARE.
         #define isnan   _isnan
     #endif
 
+	#if defined(WINCE)
+		#define cosf	cos
+		#define sinf	sin
+		#define tanf	tan
+		#define acosf	acos
+		#define asinf	asin
+		#define atanf	atan
+		#define atan2f	atan2
+		#define coshf	cosh
+		#define sinhf	sinh
+		#define tanhf	tanh
+
+		#define expf	exp
+		#define frexpf	frexp
+		#define ldexpf	ldexp
+		#define logf	log
+		#define log10f	log10
+		#define modff	modf
+		#define powf	pow
+		#define sqrtf	sqrt
+		#define ceilf	ceil
+		#define fabsf	fabs
+		#define floorf	floor
+		#define fmodf	fmod
+
+		#ifndef M_PI
+			#define M_PI 3.14159265358979323846264338327950288
+		#endif
+
+		#ifndef M_E
+			#define M_E 2.71828182845904523536028747135266250
+		#endif
+
+		#ifndef M_PI_X_2
+			#define M_PI_X_2 (float)M_PI * 2.0f
+		#endif
+	#endif
+
 #endif  // CC_PLATFORM_WIN32
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WOPHONE && defined(_TRANZDA_VM_))
@@ -74,6 +112,20 @@ THE SOFTWARE.
 #define MIN     min
 #define MAX     max
 
+#if defined(WINCE)
+	#undef MIN
+	#undef MAX
+	#define MIN(x,y) (((x) > (y)) ? (y) : (x))
+	#define MAX(x,y) (((x) < (y)) ? (y) : (x))
+
+	struct timeval
+	{
+		long tv_sec;		// seconds
+		long tv_usec;    // microSeconds
+	};
+
+#endif
+
 // Structure timeval has define in winsock.h, include windows.h for it.
 #include <Windows.h>
 
@@ -82,6 +134,7 @@ struct timezone
     int tz_minuteswest;
     int tz_dsttime;
 };
+
 
 int CC_DLL gettimeofday(struct timeval *, struct timezone *);
 

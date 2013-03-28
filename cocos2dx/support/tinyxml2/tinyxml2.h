@@ -86,11 +86,11 @@ inline int TIXML_SNPRINTF( char* buffer, size_t size, const char* format, ... )
 {
     va_list va;
     va_start( va, format );
-    int result = vsnprintf_s( buffer, size, _TRUNCATE, format, va );
+    int result = vsnprintf( buffer, size, format, va );
     va_end( va );
     return result;
 }
-#define TIXML_SSCANF   sscanf_s
+#define TIXML_SSCANF   sscanf
 #else
 // GCC version 3 and higher
 //#warning( "Using sn* functions." )
