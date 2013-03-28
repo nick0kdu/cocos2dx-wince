@@ -98,11 +98,13 @@ namespace
 			sendUpdate=true;
 			g_accelY=0.0;
 			break;
+#ifndef	WINCE
 		case VK_OEM_COMMA:
 		case VK_OEM_PERIOD:
 			sendUpdate=true;
 			g_accelZ=0.0;
 			break;
+#endif
 		}
 		return sendUpdate;
 	}

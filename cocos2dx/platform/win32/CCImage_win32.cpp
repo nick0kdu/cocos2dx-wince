@@ -267,9 +267,9 @@ public:
 					fontName = fontName.substr(0,nFindPos);				
 				}
 				tNewFont.lfCharSet = DEFAULT_CHARSET;
-				WCHAR temp[fontName.size()+1] = L"\0";
-				MultiByteToWideChar(CP_ACP, 0, fontName.c_str() , fontName.size(), temp , fontName.size()+1);
-                wcscpy(tNewFont.lfFaceName, LF_FACESIZE, temp);
+				WCHAR temp[LF_FACESIZE] = L"\0";
+				MultiByteToWideChar(CP_ACP, 0, fontName.c_str() , fontName.size(), temp , LF_FACESIZE);
+                wcscpy(tNewFont.lfFaceName, temp);
             }
             if (nSize)
             {
@@ -356,9 +356,10 @@ public:
             HGDIOBJ hOld = SelectObject(m_hDC, m_hFont);
 
             // measure text size
-            WCHAR pwszText[nLen+1] = L"\0";
+            WCHAR* pwszText = new WCHAR[nLen + 1];
 			MultiByteToWideChar(CP_ACP, 0, pszText , nLen, pwszText , nLen+1);
             DrawTextW(m_hDC, pwszText, nLen, &rc, dwCalcFmt);
+			delete [] pwszText;
             SelectObject(m_hDC, hOld);
 
             tRet.cx = rc.right;
