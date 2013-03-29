@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ****************************************************************************/
 
-#include "windows.h"
+#include <windows.h>
 #include "CCDirector.h"
 
 #define CC_RETINA_DISPLAY_FILENAME_SUFFIX "-hd"
@@ -40,9 +40,18 @@ void _CheckPath()
 {
 	if (! s_pszResourcePath[0])
 	{
-		WCHAR  wszPath[MAX_PATH];
+		WCHAR  wszPath[MAX_PATH] = L"\0";
+		#ifdef WINCE
+			WCHAR* wszTemp = NULL;
+   			GetModuleFileNameW(NULL,wszPath,MAX_PATH);
+   			wszTemp = wcsrchr(wszPath,L'\\'); // Finds last occurence and replace it with NULL.
+   			*(wszTemp+1) = L'\0';
+		#else
+			GetCurrentDirectoryW(sizeof(wszPath), wszPath);
+		#endif
+		int len = wcslen(wszPath);
 		int nNum = WideCharToMultiByte(CP_ACP, 0, wszPath, 
-			GetCurrentDirectoryW(sizeof(wszPath), wszPath), 
+			len,
 			s_pszResourcePath, MAX_PATH, NULL, NULL);
         s_pszResourcePath[nNum] = '\\';
 	}
@@ -134,8 +143,14 @@ const char* CCFileUtils::fullPathFromRelativePath(const char *pszRelativePath)
             }
         }
 	}  
-
+#ifndef WINCE
 	DWORD attrib = GetFileAttributesA(hiRes.c_str());
+#else
+	WCHAR pwHiRes = new WCHAR[hiRes.size() + 1];
+	MultiByteToWideChar(CP_ACP, 0, hiRes.c_str(), hiRes.size(), pwHiRes, hiRes.size() + 1);
+	DWORD attrib = GetFileAttributesW(pwHiRes);
+	delete [] pwHiRes;
+#endif
 	if (attrib != INVALID_FILE_ATTRIBUTES && ! (FILE_ATTRIBUTE_DIRECTORY & attrib))
     {
         pRet->m_sString.swap(hiRes);
@@ -196,7 +211,17 @@ string CCFileUtils::getWriteablePath()
 	// return the path that the exe file saved in
 
 	char full_path[_MAX_PATH + 1];
-	::GetModuleFileNameA(NULL, full_path, _MAX_PATH + 1);
+	
+	#ifdef WINCE
+		WCHAR temp[_MAX_PATH + 1] = L"\0";
+		::GetModuleFileNameW(NULL, temp, _MAX_PATH + 1);
+		int len = wcslen(temp);
+		int nNum = WideCharToMultiByte(CP_ACP, 0, temp, 
+			len,
+			full_path, _MAX_PATH + 1, NULL, NULL);
+	#else
+		::GetModuleFileNameA(NULL, full_path, _MAX_PATH + 1);
+	#endif
 
 	string ret((char*)full_path);
 

@@ -571,6 +571,7 @@ void CCEGLView::centerWindow()
     GetWindowRect(GetDesktopWindow(), &rcDesktop);
 
     // substract the task bar
+#ifndef WINCE
     HWND hTaskBar = FindWindow(TEXT("Shell_TrayWnd"), NULL);
     if (hTaskBar != NULL)
     {
@@ -582,6 +583,7 @@ void CCEGLView::centerWindow()
         SHAppBarMessage(ABM_GETTASKBARPOS, &abd);
         SubtractRect(&rcDesktop, &rcDesktop, &abd.rc);
     }
+#endif
     GetWindowRect(m_hWnd, &rcWindow);
 
     int offsetX = (rcDesktop.right - rcDesktop.left - (rcWindow.right - rcWindow.left)) / 2;

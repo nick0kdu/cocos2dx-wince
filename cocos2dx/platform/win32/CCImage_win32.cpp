@@ -24,6 +24,157 @@ THE SOFTWARE.
 
 NS_CC_BEGIN;
 
+
+////////////////////////////////////////////////////////////////////////////////
+// copy frome cximage
+#if defined (_WIN32_WCE)
+
+#ifndef DEFAULT_GUI_FONT
+#define DEFAULT_GUI_FONT 17
+#endif
+
+#ifndef PROOF_QUALITY
+#define PROOF_QUALITY 2
+#endif
+
+struct DIBINFO : public BITMAPINFO
+{
+	RGBQUAD    arColors[255];    // Color table info - adds an extra 255 entries to palette
+	operator LPBITMAPINFO()          { return (LPBITMAPINFO) this; }
+	operator LPBITMAPINFOHEADER()    { return &bmiHeader;          }
+	RGBQUAD* ColorTable()            { return bmiColors;           }
+};
+
+int BytesPerLine(int nWidth, int nBitsPerPixel)
+{
+	return ( (nWidth * nBitsPerPixel + 31) & (~31) ) / 8;
+}
+
+int NumColorEntries(int nBitsPerPixel, int nCompression, DWORD biClrUsed)
+{
+	int nColors = 0;
+	switch (nBitsPerPixel)
+	{
+	case 1:
+		nColors = 2;  break;
+	case 2:
+		nColors = 4;  break;   // winCE only
+	case 4:
+		nColors = 16; break;
+	case 8:
+		nColors =256; break;
+	case 24:
+		nColors = 0;  break;
+	case 16:
+	case 32:
+		nColors = 3;  break; // I've found that PocketPCs need this regardless of BI_RGB or BI_BITFIELDS
+	default:
+		ASSERT(FALSE);
+	}
+	// If biClrUsed is provided, and it is a legal value, use it
+	if (biClrUsed > 0 && biClrUsed <= (DWORD)nColors)
+		return biClrUsed;
+
+	return nColors;
+}
+
+int GetDIBits(
+			  HDC hdc,           // handle to DC
+			  HBITMAP hbmp,      // handle to bitmap
+			  UINT uStartScan,   // first scan line to set
+			  UINT cScanLines,   // number of scan lines to copy
+			  LPVOID lpvBits,    // array for bitmap bits
+			  LPBITMAPINFO lpbi, // bitmap data buffer
+			  UINT uUsage        // RGB or palette index
+			  )
+{
+	UINT	iColorTableSize = 0;
+
+	if (!hbmp)
+		return 0;
+
+	// Get dimensions of bitmap
+	BITMAP bm;
+	if (!::GetObject(hbmp, sizeof(bm),(LPVOID)&bm))
+		return 0;
+
+	//3. Creating new bitmap and receive pointer to it's bits.
+	HBITMAP hTargetBitmap;
+	void *pBuffer;
+
+	//3.1 Initilize DIBINFO structure
+	DIBINFO  dibInfo;
+	dibInfo.bmiHeader.biBitCount = 24;
+	dibInfo.bmiHeader.biClrImportant = 0;
+	dibInfo.bmiHeader.biClrUsed = 0;
+	dibInfo.bmiHeader.biCompression = 0;
+	dibInfo.bmiHeader.biHeight = bm.bmHeight;
+	dibInfo.bmiHeader.biPlanes = 1;
+	dibInfo.bmiHeader.biSize = 40;
+	dibInfo.bmiHeader.biSizeImage = bm.bmHeight*BytesPerLine(bm.bmWidth,24);
+	dibInfo.bmiHeader.biWidth = bm.bmWidth;
+	dibInfo.bmiHeader.biXPelsPerMeter = 3780;
+	dibInfo.bmiHeader.biYPelsPerMeter = 3780;
+	dibInfo.bmiColors[0].rgbBlue = 0;
+	dibInfo.bmiColors[0].rgbGreen = 0;
+	dibInfo.bmiColors[0].rgbRed = 0;
+	dibInfo.bmiColors[0].rgbReserved = 0;
+
+	//3.2 Create bitmap and receive pointer to points into pBuffer
+	HDC hDC = ::GetDC(NULL);
+	ASSERT(hDC);
+	hTargetBitmap = CreateDIBSection(
+		hDC,
+		(const BITMAPINFO*)dibInfo,
+		DIB_RGB_COLORS,
+		(void**)&pBuffer,
+		NULL,
+		0);
+
+	::ReleaseDC(NULL, hDC);
+
+	//4. Copy source bitmap into the target bitmap.
+
+	//4.1 Create 2 device contexts
+	HDC memDc = CreateCompatibleDC(NULL);
+	if (!memDc) {
+		ASSERT(FALSE);
+	}
+
+	HDC targetDc = CreateCompatibleDC(NULL);
+	if (!targetDc) {
+		ASSERT(FALSE);
+	}
+
+	//4.2 Select source bitmap into one DC, target into another
+	HBITMAP hOldBitmap1 = (HBITMAP)::SelectObject(memDc, hbmp);
+	HBITMAP hOldBitmap2 = (HBITMAP)::SelectObject(targetDc, hTargetBitmap);
+
+	//4.3 Copy source bitmap into the target one
+	BitBlt(targetDc, 0, 0, bm.bmWidth, bm.bmHeight, memDc, 0, 0, SRCCOPY);
+
+	//4.4 Restore device contexts
+	::SelectObject(memDc, hOldBitmap1);
+	::SelectObject(targetDc, hOldBitmap2);
+	DeleteDC(memDc);
+	DeleteDC(targetDc);
+
+	//Here we can bitmap bits: pBuffer. Note:
+	// 1. pBuffer contains 3 bytes per point
+	// 2. Lines ane from the bottom to the top!
+	// 3. Points in the line are from the left to the right
+	// 4. Bytes in one point are BGR (blue, green, red) not RGB
+	// 5. Don't delete pBuffer, it will be automatically deleted
+	//    when delete hTargetBitmap
+	lpvBits = pBuffer;
+
+	DeleteObject(hbmp);
+	//DeleteObject(hTargetBitmap);
+
+	return 1;
+}
+#endif 
+
 /**
 @brief	A memory DC which uses to draw text on bitmap.
 */
@@ -99,9 +250,9 @@ public:
 			std::string fontName = pFontName;
 			std::string fontPath;
             HFONT       hDefFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
-            LOGFONTA    tNewFont = {0};
-            LOGFONTA    tOldFont = {0};
-            GetObjectA(hDefFont, sizeof(tNewFont), &tNewFont);
+            LOGFONTW    tNewFont = {0};
+            LOGFONTW    tOldFont = {0};
+            GetObjectW(hDefFont, sizeof(tNewFont), &tNewFont);
             if (fontName.c_str())
             {	
 				// create font from ttf file
@@ -116,16 +267,18 @@ public:
 					fontName = fontName.substr(0,nFindPos);				
 				}
 				tNewFont.lfCharSet = DEFAULT_CHARSET;
-                strcpy_s(tNewFont.lfFaceName, LF_FACESIZE, fontName.c_str());
+				WCHAR temp[LF_FACESIZE] = L"\0";
+				MultiByteToWideChar(CP_ACP, 0, fontName.c_str() , fontName.size(), temp , LF_FACESIZE);
+                wcscpy(tNewFont.lfFaceName, temp);
             }
             if (nSize)
             {
                 tNewFont.lfHeight = -nSize;
             }
-            GetObjectA(m_hFont,  sizeof(tOldFont), &tOldFont);
+            GetObjectW(m_hFont,  sizeof(tOldFont), &tOldFont);
 
             if (tOldFont.lfHeight == tNewFont.lfHeight
-                && ! strcpy(tOldFont.lfFaceName, tNewFont.lfFaceName))
+                && ! wcscpy(tOldFont.lfFaceName, tNewFont.lfFaceName))
             {
                 // already has the font 
                 bRet = true;
@@ -169,7 +322,7 @@ public:
             m_hFont = NULL;
 
             // create new font
-            m_hFont = CreateFontIndirectA(&tNewFont);
+            m_hFont = CreateFontIndirectW(&tNewFont);
             if (! m_hFont)
             {
                 // create failed, use default font
@@ -203,7 +356,10 @@ public:
             HGDIOBJ hOld = SelectObject(m_hDC, m_hFont);
 
             // measure text size
-            DrawTextA(m_hDC, pszText, nLen, &rc, dwCalcFmt);
+            WCHAR* pwszText = new WCHAR[nLen + 1];
+			MultiByteToWideChar(CP_ACP, 0, pszText , nLen, pwszText , nLen+1);
+            DrawTextW(m_hDC, pwszText, nLen, &rc, dwCalcFmt);
+			delete [] pwszText;
             SelectObject(m_hDC, hOld);
 
             tRet.cx = rc.right;
@@ -328,7 +484,7 @@ public:
             int nBufLen  = nLen + 1;
             pwszBuffer = new wchar_t[nBufLen];
             CC_BREAK_IF(! pwszBuffer);
-            nLen = MultiByteToWideChar(CP_UTF8, 0, pszText, nLen, pwszBuffer, nBufLen);
+            nLen = MultiByteToWideChar(CP_ACP, 0, pszText, nLen, pwszBuffer, nBufLen);
 
             // draw text
             nRet = DrawTextW(m_hDC, pwszBuffer, nLen, &rcText, dwFmt);
