@@ -35,7 +35,9 @@ THE SOFTWARE.
 // on ios, we should use platform/ios/CCImage_ios.mm instead
 
 #define  QGLOBAL_H        // defined for wophone
+#ifndef WINCE
 #include "jpeglib.h"
+#endif
 #undef   QGLOBAL_H
 
 #define CC_RGB_PREMULTIPLY_APLHA(vr, vg, vb, va) \
@@ -135,6 +137,7 @@ bool CCImage::initWithImageData(void * pData,
 
 bool CCImage::_initWithJpgData(void * data, int nSize)
 {
+#ifndef WINCE
     /* these are standard libjpeg structures for reading(decompression) */
     struct jpeg_decompress_struct cinfo;
     struct jpeg_error_mgr jerr;
@@ -202,6 +205,9 @@ bool CCImage::_initWithJpgData(void * data, int nSize)
 
     CC_SAFE_DELETE_ARRAY(row_pointer[0]);
     return bRet;
+#else
+	return false;
+#endif
 }
 
 bool CCImage::_initWithPngData(void * pData, int nDatalen)
@@ -243,8 +249,13 @@ bool CCImage::_initWithPngData(void * pData, int nDatalen)
         // PNG_TRANSFORM_PACKING: expand 1, 2 and 4-bit samples to bytes
         // PNG_TRANSFORM_STRIP_16: strip 16-bit samples to 8 bits
         // PNG_TRANSFORM_GRAY_TO_RGB: expand grayscale samples to RGB (or GA to RGBA)
+#ifndef WINCE
         png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_EXPAND | PNG_TRANSFORM_PACKING 
             | PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_GRAY_TO_RGB, 0);
+#else
+		png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_EXPAND | PNG_TRANSFORM_PACKING 
+			| PNG_TRANSFORM_STRIP_16, 0);
+#endif
 
         int         color_type  = 0;
         png_uint_32 nWidth = 0;
@@ -508,6 +519,7 @@ bool CCImage::_saveImageToPNG(const char * pszFilePath, bool bIsToRGB)
 }
 bool CCImage::_saveImageToJPG(const char * pszFilePath)
 {
+#ifndef WINCE
 	bool bRet = false;
 	do 
 	{
@@ -582,6 +594,9 @@ bool CCImage::_saveImageToJPG(const char * pszFilePath)
 		bRet = true;
 	} while (0);
 	return bRet;
+#else
+	return false;
+#endif
 }
 
 NS_CC_END;

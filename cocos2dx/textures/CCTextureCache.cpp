@@ -38,9 +38,12 @@ THE SOFTWARE.
 #include "CCImage.h"
 #include "support/ccUtils.h"
 #include "CCScheduler.h"
+#ifndef WINCE
 #include "pthread.h"
-#include "CCThread.h"
 #include "semaphore.h"
+#endif
+#include "CCThread.h"
+
 
 namespace   cocos2d {
 
@@ -58,12 +61,14 @@ typedef struct _ImageInfo
 	CCImage::EImageFormat imageType;
 } ImageInfo;
 
+#ifndef WINCE
 static pthread_t s_loadingThread;
 
 static pthread_mutex_t		s_asyncStructQueueMutex;
 static pthread_mutex_t      s_ImageInfoMutex;
 
 static sem_t s_sem;
+#endif
 static bool need_quit;
 
 static std::queue<AsyncStruct*>		*s_pAsyncStructQueue;
@@ -96,14 +101,20 @@ static void* loadImage(void* data)
 	while (true)
 	{
 		// wait for rendering thread to ask for loading if s_pAsyncStructQueue is empty
+#ifndef WINCE
 		sem_wait(&s_sem);
+#endif
 
 		std::queue<AsyncStruct*> *pQueue = s_pAsyncStructQueue;
-
+#ifndef WINCE
 		pthread_mutex_lock(&s_asyncStructQueueMutex);// get async struct from queue
+#endif
         if (pQueue->empty())
         {
-            pthread_mutex_unlock(&s_asyncStructQueueMutex);
+#ifndef WINCE
+			pthread_mutex_unlock(&s_asyncStructQueueMutex);
+#endif
+            
 	if (need_quit)
 		break;
 	else
@@ -113,7 +124,9 @@ static void* loadImage(void* data)
         {
             pAsyncStruct = pQueue->front();
             pQueue->pop();
+#ifndef WINCE
             pthread_mutex_unlock(&s_asyncStructQueueMutex);
+#endif
         }		
 
 		const char *filename = pAsyncStruct->filename.c_str();
@@ -144,9 +157,15 @@ static void* loadImage(void* data)
 		pImageInfo->imageType = imageType;
 
 		// put the image info into the queue
+#ifndef WINCE
 		pthread_mutex_lock(&s_ImageInfoMutex);
+#endif
+		
 		s_pImageQueue->push(pImageInfo);
-		pthread_mutex_unlock(&s_ImageInfoMutex);	
+#ifndef WINCE
+		pthread_mutex_unlock(&s_ImageInfoMutex);
+#endif
+		
 	}
 	
 	return 0;
@@ -176,7 +195,10 @@ CCTextureCache::~CCTextureCache()
 {
 	CCLOGINFO("cocos2d: deallocing CCTextureCache.");
 	need_quit = true;
+#ifndef WINCE
 	sem_post(&s_sem);
+#endif
+	
 	CC_SAFE_RELEASE(m_pTextures);
 }
 
@@ -195,6 +217,8 @@ char * CCTextureCache::description()
 
 void CCTextureCache::addImageAsync(const char *path, CCObject *target, SEL_CallFuncO selector)
 {
+#ifndef WINCE
+
 	CCAssert(path != NULL, "TextureCache: fileimage MUST not be NULL");	
 
 	CCTexture2D *texture = NULL;
@@ -229,11 +253,12 @@ void CCTextureCache::addImageAsync(const char *path, CCObject *target, SEL_CallF
 	{		     
         s_pAsyncStructQueue = new queue<AsyncStruct*>();
 	    s_pImageQueue = new queue<ImageInfo*>();		
-
+#ifndef WINCE
 		pthread_mutex_init(&s_asyncStructQueueMutex, NULL);
 		sem_init(&s_sem, 0, 0);
 		pthread_mutex_init(&s_ImageInfoMutex, NULL);
 		pthread_create(&s_loadingThread, NULL, loadImage, NULL);
+#endif
 
 		CCScheduler::sharedScheduler()->scheduleSelector(schedule_selector(CCTextureCache::addImageAsyncCallBack), this, 0, false);
 		need_quit = false;
@@ -252,14 +277,17 @@ void CCTextureCache::addImageAsync(const char *path, CCObject *target, SEL_CallF
 	pthread_mutex_unlock(&s_asyncStructQueueMutex);
 
 	sem_post(&s_sem);
+#endif
 }
 
 void CCTextureCache::addImageAsyncCallBack(ccTime dt)
 {
+	#ifndef WINCE
 	// the image is generated in loading thread
 	std::queue<ImageInfo*> *imagesQueue = s_pImageQueue;
 
 	pthread_mutex_lock(&s_ImageInfoMutex);
+
 	if (imagesQueue->empty())
 	{
 		pthread_mutex_unlock(&s_ImageInfoMutex);
@@ -307,6 +335,7 @@ void CCTextureCache::addImageAsyncCallBack(ccTime dt)
 		delete pAsyncStruct;
 		delete pImageInfo;
 	}
+#endif
 }
 
 CCTexture2D * CCTextureCache::addImage(const char * path)

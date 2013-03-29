@@ -42,12 +42,21 @@ THE SOFTWARE.
 #define ccglDeleteFramebuffers		CCEGLView::glDeleteFramebuffersOES
 #define ccglCheckFramebufferStatus	CCEGLView::glCheckFramebufferStatusOES
 #else
+#ifndef WINCE
 #define ccglGenerateMipmap			glGenerateMipmapOES
 #define ccglGenFramebuffers			glGenFramebuffersOES
 #define ccglBindFramebuffer			glBindFramebufferOES
 #define ccglFramebufferTexture2D	glFramebufferTexture2DOES
 #define ccglDeleteFramebuffers		glDeleteFramebuffersOES
 #define ccglCheckFramebufferStatus	glCheckFramebufferStatusOES
+#else
+#define ccglGenerateMipmap			
+#define ccglGenFramebuffers			
+#define ccglBindFramebuffer			
+#define ccglFramebufferTexture2D	
+#define ccglDeleteFramebuffers		
+#define ccglCheckFramebufferStatus	
+#endif
 #endif
 #define ccglTranslate				glTranslatef
 

@@ -146,7 +146,7 @@ const char* CCFileUtils::fullPathFromRelativePath(const char *pszRelativePath)
 #ifndef WINCE
 	DWORD attrib = GetFileAttributesA(hiRes.c_str());
 #else
-	WCHAR pwHiRes = new WCHAR[hiRes.size() + 1];
+	WCHAR* pwHiRes = new WCHAR[hiRes.size() + 1];
 	MultiByteToWideChar(CP_ACP, 0, hiRes.c_str(), hiRes.size(), pwHiRes, hiRes.size() + 1);
 	DWORD attrib = GetFileAttributesW(pwHiRes);
 	delete [] pwHiRes;

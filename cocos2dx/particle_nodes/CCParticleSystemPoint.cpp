@@ -111,7 +111,9 @@ void CCParticleSystemPoint::draw()
 	glBindTexture(GL_TEXTURE_2D, m_pTexture->getName());
 
 	glEnable(GL_POINT_SPRITE_OES);
+#ifndef WINCE
 	glTexEnvi( GL_POINT_SPRITE_OES, GL_COORD_REPLACE_OES, GL_TRUE );	
+#endif
 
 #define kPointSize sizeof(m_pVertices[0])
 

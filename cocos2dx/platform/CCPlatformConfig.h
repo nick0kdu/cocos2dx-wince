@@ -191,6 +191,10 @@ build for which target platform
 // Check the supportive of platform
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
 #pragma warning (disable:4127)  
+#ifdef WINCE
+#pragma warning (disable:4251)
+#pragma warning (disable:4244)
+#endif
 #endif  // CC_PLATFORM_WIN32
 
 #endif  // __CC_PLATFORM_CONFIG_H__

@@ -28,6 +28,8 @@ THE SOFTWARE.
 
 #include <windows.h>
 
+
+
 int CC_DLL gettimeofday(struct timeval * val, struct timezone *)
 {
     if (val)

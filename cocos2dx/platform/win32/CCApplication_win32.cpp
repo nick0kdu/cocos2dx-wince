@@ -184,6 +184,11 @@ static void PVRFrameEnableControlWindow(bool bEnable)
     const wchar_t * wszNewData = (bEnable) ? L"NO" : L"YES";
     wchar_t wszOldData[256] = {0};
     DWORD   dwSize = sizeof(wszOldData);
+#ifdef WINCE
+#ifndef LSTATUS
+	typedef __success(return==ERROR_SUCCESS) LONG LSTATUS;
+#endif
+#endif
     LSTATUS status = RegQueryValueExW(hKey, wszValue, 0, NULL, (LPBYTE)wszOldData, &dwSize);
     if (ERROR_FILE_NOT_FOUND == status              // the key not exist
         || (ERROR_SUCCESS == status                 // or the hide_gui value is exist

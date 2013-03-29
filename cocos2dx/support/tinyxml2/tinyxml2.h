@@ -86,7 +86,7 @@ inline int TIXML_SNPRINTF( char* buffer, size_t size, const char* format, ... )
 {
     va_list va;
     va_start( va, format );
-    int result = vsnprintf( buffer, size, format, va );
+    int result = vsprintf( buffer, format, va );
     va_end( va );
     return result;
 }

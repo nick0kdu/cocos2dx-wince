@@ -48,8 +48,11 @@ CCRenderTexture::CCRenderTexture()
 
 CCRenderTexture::~CCRenderTexture()
 {
+
     removeAllChildrenWithCleanup(true);
+#ifndef WINCE
     ccglDeleteFramebuffers(1, &m_uFBO);
+#endif
 
 	CC_SAFE_DELETE(m_pUITextureImage);
 }

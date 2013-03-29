@@ -71,6 +71,7 @@ namespace
 			sendUpdate=true;
 			g_accelY=CLAMP( g_accelY-g_accelerationStep,g_minAcceleration,g_maxAcceleration );
 			break;
+#ifndef WINCE
 		case VK_OEM_COMMA:
 			sendUpdate=true;
 			g_accelZ=CLAMP( g_accelZ+g_accelerationStep,g_minAcceleration,g_maxAcceleration );
@@ -79,6 +80,7 @@ namespace
 			sendUpdate=true;
 			g_accelZ=CLAMP( g_accelZ-g_accelerationStep,g_minAcceleration,g_maxAcceleration );
 			break;
+#endif
 		}
 		return sendUpdate;
 	}
@@ -132,8 +134,12 @@ namespace
 
 		if ( sendUpdate )
 		{
+#ifndef WINCE
 			const time_t	theTime=time(NULL);
 			const double	timestamp=(double)theTime / 100.0;
+#else
+			const double	timestamp = GetTickCount() / 100.0;
+#endif
 			pAccelerometer->update( g_accelX,g_accelY,g_accelZ,timestamp );
 		}
 	}

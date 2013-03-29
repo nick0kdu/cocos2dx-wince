@@ -76,6 +76,9 @@ THE SOFTWARE.
 		#ifndef M_PI_X_2
 			#define M_PI_X_2 (float)M_PI * 2.0f
 		#endif
+		#ifndef M_PI_2
+		#define M_PI_2     1.57079632679489661923
+		#endif
 	#endif
 
 #endif  // CC_PLATFORM_WIN32

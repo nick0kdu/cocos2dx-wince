@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="libcocos2dce"
 	ProjectGUID="{45B4CDA1-CF3E-4F1B-9B44-EAD3B44987E0}"
+	RootNamespace="libcocos2dce"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -53,10 +54,12 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\platform;..\platform\third_party\win32\iconv;..\platform\third_party\win32\zlib;..\platform\third_party\win32\libpng;..\platform\third_party\win32\libjpeg;..\platform\third_party\win32\libxml2;..\platform\third_party\win32\OGLES;..\include;.."
+				AdditionalIncludeDirectories="..\platform;..\platform\third_party\wince\zlib;..\platform\third_party\wince\libpng;..\platform\third_party\wince\wcecompat\include;..\platform\third_party\wince\OGLES;..\include;.."
 				PreprocessorDefinitions="_DEBUG;WIN32;_WIN32_WCE=$(CEVER);UNDER_CE;WINCE;DEBUG;_WINDOWS;_USRDLL;COCOS2DWINCE_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE"
 				MinimalRebuild="true"
 				RuntimeLibrary="1"
+				TreatWChar_tAsBuiltInType="false"
+				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="3"
@@ -76,8 +79,10 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,5.00"
+				AdditionalDependencies="zlib.lib png.lib libGLES_CM.lib codegen.lib aygshell.lib ug.lib"
 				OutputFile="$(OutDir)/cocos2d-wince.dll"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories="..\platform\third_party\wince\libraries"
 				DelayLoadDLLs="$(NOINHERIT)"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/cocos2d-wince.pdb"
@@ -491,8 +496,11 @@
 				ExecutionBucket="7"
 				Optimization="2"
 				FavorSizeOrSpeed="2"
-				PreprocessorDefinitions="NDEBUG;_WIN32_WCE=$(CEVER);UNDER_CE;WINCE;_WINDOWS;_USRDLL;COCOS2DWINCE_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE"
+				AdditionalIncludeDirectories="..\platform;..\platform\third_party\wince\zlib;..\platform\third_party\wince\libpng;..\platform\third_party\wince\wcecompat\include;..\platform\third_party\wince\OGLES;..\include;.."
+				PreprocessorDefinitions="NDEBUG;WIN32;_WIN32_WCE=$(CEVER);UNDER_CE;WINCE;_WINDOWS;_USRDLL;COCOS2DWINCE_EXPORTS;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE"
 				RuntimeLibrary="0"
+				TreatWChar_tAsBuiltInType="false"
+				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="3"
@@ -512,8 +520,10 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,5.00"
+				AdditionalDependencies="zlib.lib png.lib libGLES_CM.lib codegen.lib aygshell.lib ug.lib"
 				OutputFile="$(OutDir)/cocos2d-wince.dll"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="..\platform\third_party\wince\libraries"
 				DelayLoadDLLs="$(NOINHERIT)"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/cocos2d-wince.pdb"
@@ -1836,6 +1846,34 @@
 				RelativePath="..\extensions\CCNotificationCenter.h"
 				>
 			</File>
+		</Filter>
+		<Filter
+			Name="wcecompat"
+			>
+			<Filter
+				Name="include"
+				>
+				<File
+					RelativePath="..\platform\third_party\wince\wcecompat\include\errno.h"
+					>
+				</File>
+				<File
+					RelativePath="..\platform\third_party\wince\wcecompat\include\stdlib.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="src"
+				>
+				<File
+					RelativePath="..\platform\third_party\wince\wcecompat\src\stdlib_extras.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\platform\third_party\wince\wcecompat\src\string_extras.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<File
 			RelativePath="..\CCCamera.cpp"

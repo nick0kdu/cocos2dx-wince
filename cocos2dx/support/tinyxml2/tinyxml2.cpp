@@ -1757,7 +1757,11 @@ void XMLPrinter::Print( const char* format, ... )
         int len = -1;
         int expand = 1000;
         while ( len < 0 ) {
+#ifndef WINCE
             len = vsnprintf( _accumulator.Mem(), _accumulator.Capacity(),  format, va );
+#else 
+			len = vsprintf( _accumulator.Mem(),  format, va );
+#endif
             if ( len < 0 ) {
                 expand *= 3/2;
                 _accumulator.PushArr( expand );

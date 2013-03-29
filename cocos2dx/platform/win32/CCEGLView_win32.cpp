@@ -36,6 +36,26 @@ THE SOFTWARE.
 #include "CCKeypadDispatcher.h"
 #include "CCApplication.h"
 
+#ifdef WINCE
+#ifndef SWP_NOCOPYBITS
+#define SWP_NOCOPYBITS      0x0100
+#endif
+#ifndef IDI_WINLOGO
+#define IDI_WINLOGO         32517
+#endif
+#ifndef CS_OWNDC
+#define CS_OWNDC            0x0020
+#endif
+#ifndef WS_EX_APPWINDOW
+#define WS_EX_APPWINDOW         0x00040000L
+#endif
+#ifndef WS_POPUPWINDOW
+#define WS_POPUPWINDOW      (WS_POPUP          | \
+							 WS_BORDER         | \
+							 WS_SYSMENU)
+#endif
+#endif
+
 NS_CC_BEGIN;
 
 //////////////////////////////////////////////////////////////////////////
@@ -219,7 +239,7 @@ bool CCEGLView::Create(LPCTSTR pTitle, int w, int h)
 		wc.cbClsExtra     = 0;                              // No Extra Window Data
 		wc.cbWndExtra     = 0;								// No Extra Window Data
 		wc.hInstance      = hInstance;						// Set The Instance
-		wc.hIcon          = LoadIcon( NULL, IDI_WINLOGO );	// Load The Default Icon
+		wc.hIcon          = LoadIcon( NULL, L"" );	// Load The Default Icon
 		wc.hCursor        = LoadCursor( NULL, IDC_ARROW );	// Load The Arrow Pointer
 		wc.hbrBackground  = NULL;                           // No Background Required For GL
 		wc.lpszMenuName   = NULL;                           // We Don't Want A Menu
@@ -590,7 +610,6 @@ void CCEGLView::centerWindow()
     offsetX = (offsetX > 0) ? offsetX : rcDesktop.left;
     int offsetY = (rcDesktop.bottom - rcDesktop.top - (rcWindow.bottom - rcWindow.top)) / 2;
     offsetY = (offsetY > 0) ? offsetY : rcDesktop.top;
-
     SetWindowPos(m_hWnd, 0, offsetX, offsetY, 0, 0, SWP_NOCOPYBITS | SWP_NOSIZE | SWP_NOOWNERZORDER | SWP_NOZORDER);
 }
 

@@ -34,6 +34,22 @@ THE SOFTWARE.
 
 namespace cocos2d {
 
+#ifdef WINCE
+	static void *  __cdecl bsearch(const void *key, const void *base, size_t nmemb, size_t size,
+		int (__cdecl * compar)(const void *, const void *))
+	{
+		while (nmemb-- > 0)
+		{
+			if (compar(key, base) == 0)
+				return (void*)base;
+
+			base = (char*)base + size;
+		}
+
+		return NULL;
+	}
+#endif
+
 
 	// CCTMXLayer - init & alloc & dealloc
 	CCTMXLayer * CCTMXLayer::layerWithTilesetInfo(CCTMXTilesetInfo *tilesetInfo, CCTMXLayerInfo *layerInfo, CCTMXMapInfo *mapInfo)
